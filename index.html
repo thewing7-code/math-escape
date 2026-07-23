@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수학 탐험대 — 방탈출</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:#0F172A;color:#fff;min-height:100vh;overflow-x:hidden;}
+.stars{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle 3s infinite;}
+@keyframes twinkle{0%,100%{opacity:.2;}50%{opacity:1;}}
+
+header{position:relative;z-index:10;background:rgba(15,23,42,.95);border-bottom:1px solid rgba(255,255,255,.1);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(8px);}
+.logo{font-size:16px;font-weight:700;color:#BFDBFE;}
+.logo span{color:#2563EB;}
+.timer-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.main-timer{font-size:22px;font-weight:700;color:#FCD34D;font-variant-numeric:tabular-nums;}
+.main-timer.danger{color:#F87171;animation:pulse .5s infinite alternate;}
+@keyframes pulse{from{opacity:1;}to{opacity:.5;}}
+.team-input{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;color:#fff;font-size:13px;width:110px;outline:none;}
+
+main{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:20px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* 인트로 */
+.story-card{background:rgba(30,41,59,.9);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px;text-align:center;}
+.story-icon{font-size:64px;margin-bottom:14px;}
+.story-title{font-size:24px;font-weight:700;color:#BFDBFE;margin-bottom:12px;}
+.story-text{font-size:14px;color:#94A3B8;line-height:1.9;margin-bottom:22px;}
+.story-text b{color:#FCD34D;}
+.btn-start{background:#2563EB;color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:16px;font-weight:700;cursor:pointer;}
+.btn-start:hover{background:#1D4ED8;}
+
+/* 진행바 */
+.progress-bar{background:rgba(255,255,255,.06);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.room-chip{flex:1;border-radius:8px;padding:7px 8px;text-align:center;font-size:11px;font-weight:700;border:1.5px solid rgba(255,255,255,.1);color:#64748B;transition:all .3s;}
+.room-chip.done{background:rgba(22,163,74,.2);border-color:#16A34A;color:#86EFAC;}
+.room-chip.active{border-color:#2563EB;color:#BFDBFE;background:rgba(37,99,235,.15);}
+.chip-icon{font-size:15px;display:block;margin-bottom:2px;}
+
+/* 방 */
+.room-card{background:rgba(30,41,59,.85);border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;margin-bottom:18px;}
+.room-head{padding:18px 22px;display:flex;align-items:center;gap:12px;}
+.room-num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;flex-shrink:0;}
+.room-title{font-size:17px;font-weight:700;}
+.room-sub{font-size:11px;margin-top:2px;opacity:.65;}
+.room-locked{opacity:.35;pointer-events:none;}
+.lock-notice{text-align:center;padding:14px;color:#475569;font-size:13px;}
+
+/* 문제 */
+.q-list{padding:0 20px 18px;}
+.q-item{background:rgba(15,23,42,.65);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:16px 18px;margin-bottom:10px;display:none;}/* 기본 숨김 */
+.q-item.visible{display:block;}
+.q-item.solved{border-color:#16A34A;background:rgba(22,163,74,.07);}
+.q-item.wrong-shake{animation:shake .35s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.q-item.nonsense-item{border-color:rgba(253,186,116,.25);}
+
+.q-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700;margin-bottom:8px;}
+.b-math{background:rgba(37,99,235,.3);color:#93C5FD;}
+.b-ns{background:rgba(253,186,116,.25);color:#FCD34D;}
+
+.q-header{display:flex;align-items:flex-start;gap:9px;margin-bottom:9px;}
+.q-num-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.q-text{font-size:14px;color:#E2E8F0;line-height:1.65;font-weight:500;}
+.q-story{font-size:12px;color:#64748B;font-style:italic;margin-bottom:9px;padding-left:33px;}
+
+/* 넌센스 박스 */
+.nonsense-box{background:rgba(0,0,0,.35);border:1.5px solid rgba(253,186,116,.3);border-radius:10px;padding:14px;margin-bottom:11px;font-size:15px;color:#FCD34D;line-height:2;text-align:center;font-family:monospace;}
+
+/* 보기 */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}
+.choice{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 12px;cursor:pointer;font-size:13px;color:#CBD5E1;transition:all .15s;text-align:left;width:100%;}
+.choice:hover:not(:disabled){border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1);}
+.choice.correct{border-color:#16A34A;background:rgba(22,163,74,.2);color:#86EFAC;font-weight:700;}
+.choice.incorrect{border-color:#DC2626;background:rgba(220,38,38,.12);color:#FCA5A5;}
+.choice:disabled{cursor:not-allowed;}
+
+/* 주관식 */
+.short-answer-wrap{display:flex;gap:8px;margin-bottom:9px;}
+.short-input{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:9px;padding:9px 13px;color:#fff;font-size:14px;outline:none;}
+.short-input:focus{border-color:#2563EB;}
+.short-input.correct-input{border-color:#16A34A;background:rgba(22,163,74,.1);}
+.short-input.wrong-input{border-color:#DC2626;}
+.btn-submit{background:#2563EB;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-submit:hover{background:#1D4ED8;}
+.btn-submit:disabled{background:#334155;cursor:not-allowed;}
+
+/* 패널티 */
+.penalty-msg{font-size:12px;color:#F87171;margin-bottom:8px;padding:6px 10px;background:rgba(220,38,38,.12);border-radius:7px;display:none;}
+.penalty-msg.show{display:block;}
+
+/* 힌트 */
+.hint-wrap{margin-top:7px;}
+.hint-cd-msg{font-size:11px;color:#475569;margin-bottom:4px;}
+.btn-hint{background:none;border:1px solid rgba(253,186,116,.35);color:#FBB86C;border-radius:7px;padding:5px 12px;font-size:12px;cursor:pointer;display:none;}
+.btn-hint.ready{display:inline-block;}
+.hint-text{margin-top:7px;padding:9px 12px;background:rgba(253,186,116,.08);border-left:3px solid #FBB86C;border-radius:0 7px 7px 0;font-size:12px;color:#FCD34D;line-height:1.6;display:none;}
+.hint-text.show{display:block;}
+
+/* 클리어 */
+.room-clear{background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.35);border-radius:11px;padding:13px 18px;margin:0 20px 18px;text-align:center;font-size:14px;color:#86EFAC;font-weight:600;display:none;}
+.room-clear.show{display:block;}
+
+/* 탈출 */
+.escape-card{background:linear-gradient(135deg,rgba(37,99,235,.25),rgba(8,145,178,.25));border:1px solid rgba(37,99,235,.4);border-radius:18px;padding:32px;text-align:center;margin-bottom:18px;}
+.escape-code{font-size:44px;font-weight:700;letter-spacing:.18em;color:#FCD34D;background:rgba(0,0,0,.3);border-radius:11px;padding:14px 24px;display:inline-block;margin:14px 0;border:2px solid rgba(252,211,77,.35);}
+
+.padlet-tip{background:rgba(8,145,178,.08);border:1px solid rgba(8,145,178,.25);border-radius:11px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#67E8F9;line-height:1.6;}
+.padlet-tip b{color:#22D3EE;}
+footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12px;color:#334155;}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+
+<header>
+  <div class="logo"><span>★</span> 수학 탐험대 방탈출</div>
+  <div class="timer-wrap">
+    <span style="font-size:11px;color:#475569">팀 이름</span>
+    <input class="team-input" id="team-name" placeholder="팀 이름 입력"/>
+    <span style="font-size:11px;color:#475569">남은 시간</span>
+    <div class="main-timer" id="timer">30:00</div>
+  </div>
+</header>
+
+<main>
+<!-- 인트로 -->
+<div class="screen active" id="screen-intro">
+  <div class="story-card">
+    <div class="story-icon">🔬</div>
+    <div class="story-title">수학 박사의 비밀 연구소</div>
+    <div class="story-text">
+      탐험대 여러분, 긴급 상황입니다!<br><br>
+      세계적인 수학 박사 <b>Dr. 알파</b>의 비밀 연구소에<br>
+      여러분이 갇혀버렸어요.<br><br>
+      연구소 AI가 오작동을 일으켜 <b>3개의 방</b>이 모두 잠겼습니다.<br><br>
+      각 방 문제를 순서대로 풀고 <b>30분 안에 탈출</b>하세요!<br><br>
+      ⚠️ <b>오답을 고르면 20초 동안 다른 보기를 선택할 수 없어요.</b><br>
+      💡 <b>힌트는 문제가 열린 후 30초 뒤에 볼 수 있어요.</b>
+    </div>
+    <button class="btn-start" onclick="startGame()">🚀 탐험 시작!</button>
+  </div>
+</div>
+
+<!-- 게임 -->
+<div class="screen" id="screen-game">
+  <div class="padlet-tip">
+    📌 <b>팀 미션:</b> 탈출 후 패들렛 4차시 섹션에 "팀 이름 + 탈출 시간 + 소감 한 줄"을 올려주세요!
+  </div>
+  <div class="progress-bar">
+    <div class="room-chip active" id="chip-1"><span class="chip-icon">🔢</span>1방 수 감각</div>
+    <div style="color:#1E293B;font-size:16px">›</div>
+    <div class="room-chip" id="chip-2"><span class="chip-icon">🔍</span>2방 패턴</div>
+    <div style="color:#1E293B;font-size:16px">›</div>
+    <div class="room-chip" id="chip-3"><span class="chip-icon">🏗️</span>3방 도형</div>
+    <div style="color:#1E293B;font-size:16px">›</div>
+    <div class="room-chip" id="chip-esc"><span class="chip-icon">🚀</span>탈출!</div>
+  </div>
+
+  <!-- ══════════ 1방 ══════════ -->
+  <div class="room-card" id="room-1">
+    <div class="room-head" style="background:linear-gradient(135deg,rgba(37,99,235,.25),rgba(37,99,235,.08));border-bottom:1px solid rgba(37,99,235,.25);">
+      <div class="room-num" style="background:#2563EB;">🔢</div>
+      <div><div class="room-title" style="color:#BFDBFE;">1방 — 수 감각 연구실</div>
+        <div class="room-sub">수직선 잠금 장치를 해제하라!</div></div>
+    </div>
+    <div class="q-list">
+
+      <!-- 1-1 객관식 -->
+      <div class="q-item visible" id="q1-1">
+        <div class="q-badge b-math">📘 수학 1</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#2563EB;">1</div>
+          <div class="q-text">입구 비밀번호 — 수직선에서 가장 오른쪽에 있는 수는?<br>보기: 0.3,  1/4,  0.7,  2/5</div></div>
+        <div class="q-story">🔒 입구 자물쇠가 깜빡이고 있어. 수직선을 떠올려봐!</div>
+        <div class="penalty-msg" id="pen-q1-1"></div>
+        <div class="choices">
+          <button class="choice" onclick="mc('q1-1',0,2)">① 0.3</button>
+          <button class="choice" onclick="mc('q1-1',1,2)">② 1/4</button>
+          <button class="choice" onclick="mc('q1-1',2,2)">③ 0.7</button>
+          <button class="choice" onclick="mc('q1-1',3,2)">④ 2/5</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q1-1">💡 힌트까지 <b id="hcnt-q1-1">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q1-1" onclick="toggleHint('ht-q1-1')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q1-1">모두 소수로! 1/4=0.25, 2/5=0.4 → 비교해봐</div>
+        </div>
+      </div>
+
+      <!-- 1-2 넌센스 -->
+      <div class="q-item nonsense-item" id="q1-2">
+        <div class="q-badge b-ns">🧩 넌센스</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#D97706;">?</div>
+          <div class="q-text">연구소 첫 번째 자물쇠 넌센스! 풀어야 다음 방이 열려.</div></div>
+        <div class="nonsense-box">자가용의 반대말은?</div>
+        <div class="q-story">🤔 수학이 아니야! 말의 반대를 생각해봐!</div>
+        <div class="penalty-msg" id="pen-q1-2"></div>
+        <div class="choices">
+          <button class="choice" onclick="mc('q1-2',0,2)">① 버스</button>
+          <button class="choice" onclick="mc('q1-2',1,2)">② 대중교통</button>
+          <button class="choice" onclick="mc('q1-2',2,2)">③ 커용</button>
+          <button class="choice" onclick="mc('q1-2',3,2)">④ 타용</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q1-2">💡 힌트까지 <b id="hcnt-q1-2">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q1-2" onclick="toggleHint('ht-q1-2')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q1-2">"자"의 반대말은? → "커"! 자가용 → 커용 😄</div>
+        </div>
+      </div>
+
+      <!-- 1-3 주관식 -->
+      <div class="q-item" id="q1-3">
+        <div class="q-badge b-math">📘 수학 2</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#2563EB;">2</div>
+          <div class="q-text">금고는 "1/2보다 크고 1보다 작은 수"만 열려.<br>조건에 맞는 소수를 직접 입력해봐! (예: 0.7)</div></div>
+        <div class="q-story">🔐 금고 화면에 커서가 깜빡인다. 직접 입력해야 해!</div>
+        <div class="penalty-msg" id="pen-q1-3"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q1-3" placeholder="답 입력 (소수로)" />
+          <button class="btn-submit" onclick="sa('q1-3', checkBetween05and1)">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q1-3">💡 힌트까지 <b id="hcnt-q1-3">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q1-3" onclick="toggleHint('ht-q1-3')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q1-3">1/2=0.5야. 0.5보다 크고 1보다 작은 소수를 써봐. (예: 0.6, 0.7, 0.8, 0.9)</div>
+        </div>
+      </div>
+
+      <!-- 1-4 객관식 -->
+      <div class="q-item" id="q1-4">
+        <div class="q-badge b-math">📘 수학 3</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#2563EB;">3</div>
+          <div class="q-text">컴퓨터 비밀번호 — 0.8,  1/4,  0.5,  3/5를<br>수직선에 올릴 때 왼쪽에서 두 번째 수는?</div></div>
+        <div class="q-story">💻 수직선이 나타났다. 순서를 정확히!</div>
+        <div class="penalty-msg" id="pen-q1-4"></div>
+        <div class="choices">
+          <button class="choice" onclick="mc('q1-4',0,2)">① 0.8</button>
+          <button class="choice" onclick="mc('q1-4',1,2)">② 1/4</button>
+          <button class="choice" onclick="mc('q1-4',2,2)">③ 0.5</button>
+          <button class="choice" onclick="mc('q1-4',3,2)">④ 3/5</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q1-4">💡 힌트까지 <b id="hcnt-q1-4">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q1-4" onclick="toggleHint('ht-q1-4')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q1-4">소수로: 0.8/0.25/0.5/0.6 → 순서: 0.25,0.5,0.6,0.8 — 두 번째는?</div>
+        </div>
+      </div>
+
+      <!-- 1-5 주관식 -->
+      <div class="q-item" id="q1-5">
+        <div class="q-badge b-math">📘 수학 4</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#2563EB;">4</div>
+          <div class="q-text">탈출 버튼 코드 — 0과 1 사이를 4등분 했을 때<br>왼쪽에서 세 번째 점의 분수를 입력해! (예: 1/4)</div></div>
+        <div class="q-story">🚪 1방 출구 버튼! 분수로 입력해봐.</div>
+        <div class="penalty-msg" id="pen-q1-5"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q1-5" placeholder="분수 입력 (예: 1/4)" />
+          <button class="btn-submit" onclick="sa('q1-5', checkQ15)">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q1-5">💡 힌트까지 <b id="hcnt-q1-5">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q1-5" onclick="toggleHint('ht-q1-5')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q1-5">4등분 → 점 3개: 1/4, 2/4(=1/2), 3/4 — 세 번째는?</div>
+        </div>
+      </div>
+
+      <div class="room-clear" id="clear-1">🎉 1방 탈출 성공! 수 감각 연구실 잠금 해제!</div>
+    </div>
+  </div>
+
+  <!-- ══════════ 2방 ══════════ -->
+  <div class="room-card room-locked" id="room-2">
+    <div class="room-head" style="background:linear-gradient(135deg,rgba(8,145,178,.25),rgba(8,145,178,.08));border-bottom:1px solid rgba(8,145,178,.25);">
+      <div class="room-num" style="background:#0891B2;">🔍</div>
+      <div><div class="room-title" style="color:#A5F3FC;">2방 — 패턴 암호실</div>
+        <div class="room-sub">AI가 숨겨놓은 패턴 암호를 해독하라!</div></div>
+    </div>
+    <div class="lock-notice" id="lock-2">🔒 1방을 먼저 탈출해야 열립니다</div>
+    <div class="q-list" id="qlist-2" style="display:none">
+
+      <!-- 2-1 주관식 -->
+      <div class="q-item" id="q2-1">
+        <div class="q-badge b-math">📘 수학 1</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#0891B2;">1</div>
+          <div class="q-text">암호 자물쇠 수열 — 3, 7, 11, □, 19, 23<br>□에 들어갈 수를 직접 입력해!</div></div>
+        <div class="q-story">🤖 AI 음성: "규칙을 찾아라!"</div>
+        <div class="penalty-msg" id="pen-q2-1"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q2-1" placeholder="숫자 입력"/>
+          <button class="btn-submit" onclick="sa('q2-1', function(v){return v.trim()==='15';})">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q2-1">💡 힌트까지 <b id="hcnt-q2-1">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q2-1" onclick="toggleHint('ht-q2-1')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q2-1">이웃한 수의 차이: 4, 4, 4 — 4씩 더하는 패턴! 11+4=?</div>
+        </div>
+      </div>
+
+      <!-- 2-2 넌센스 -->
+      <div class="q-item nonsense-item" id="q2-2">
+        <div class="q-badge b-ns">🧩 넌센스</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#D97706;">?</div>
+          <div class="q-text">2방 넌센스! 규칙을 찾아봐.</div></div>
+        <div class="nonsense-box">
+          5 + 3 = 2 8<br>
+          9 + 1 = 8 10<br>
+          8 + 6 = 2 14<br>
+          5 + 4 = 1 9<br>
+          7 + 3 = ?
+        </div>
+        <div class="q-story">🤔 이상한 덧셈이야. 두 숫자 사이의 숨겨진 관계를 찾아!</div>
+        <div class="penalty-msg" id="pen-q2-2"></div>
+        <div class="choices">
+          <button class="choice" onclick="mc('q2-2',0,0)">① 4 10</button>
+          <button class="choice" onclick="mc('q2-2',1,0)">② 10 4</button>
+          <button class="choice" onclick="mc('q2-2',2,0)">③ 4 7</button>
+          <button class="choice" onclick="mc('q2-2',3,0)">④ 21</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q2-2">💡 힌트까지 <b id="hcnt-q2-2">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q2-2" onclick="toggleHint('ht-q2-2')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q2-2">앞 숫자 = 두 수의 차이, 뒷 숫자 = 두 수의 합!<br>7-3=4, 7+3=10 → "4 10"</div>
+        </div>
+      </div>
+
+      <!-- 2-3 객관식 -->
+      <div class="q-item" id="q2-3">
+        <div class="q-badge b-math">📘 수학 2</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#0891B2;">2</div>
+          <div class="q-text">벽에 새겨진 표 — 1→4, 2→8, 3→12, 4→16, 5→□<br>□는?</div></div>
+        <div class="q-story">🗺️ 벽에 오래된 표가 새겨져 있다!</div>
+        <div class="penalty-msg" id="pen-q2-3"></div>
+        <div class="choices">
+          <button class="choice" onclick="mc('q2-3',0,2)">① 18</button>
+          <button class="choice" onclick="mc('q2-3',1,2)">② 19</button>
+          <button class="choice" onclick="mc('q2-3',2,2)">③ 20</button>
+          <button class="choice" onclick="mc('q2-3',3,2)">④ 24</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q2-3">💡 힌트까지 <b id="hcnt-q2-3">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q2-3" onclick="toggleHint('ht-q2-3')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q2-3">입력값 × 4 = 출력값! 5 × 4 = ?</div>
+        </div>
+      </div>
+
+      <!-- 2-4 주관식 -->
+      <div class="q-item" id="q2-4">
+        <div class="q-badge b-math">📘 수학 3</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#0891B2;">3</div>
+          <div class="q-text">천장의 별 패턴 — 1, 2, 4, 8, □<br>□에 들어갈 수를 입력해!</div></div>
+        <div class="q-story">⭐ 천장에 별 패턴이 빛나고 있다!</div>
+        <div class="penalty-msg" id="pen-q2-4"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q2-4" placeholder="숫자 입력"/>
+          <button class="btn-submit" onclick="sa('q2-4', function(v){return v.trim()==='16';})">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q2-4">💡 힌트까지 <b id="hcnt-q2-4">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q2-4" onclick="toggleHint('ht-q2-4')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q2-4">앞의 수 × 2 패턴! 8 × 2 = ?</div>
+        </div>
+      </div>
+
+      <!-- 2-5 객관식 -->
+      <div class="q-item" id="q2-5">
+        <div class="q-badge b-math">📘 수학 4</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#0891B2;">4</div>
+          <div class="q-text">마지막 패턴 암호 — 2, 3, 5, 8, 12, 17, □<br>□는?</div></div>
+        <div class="q-story">🔑 출구 자물쇠 숫자 패드!</div>
+        <div class="penalty-msg" id="pen-q2-5"></div>
+        <div class="choices">
+          <button class="choice" onclick="mc('q2-5',0,2)">① 21</button>
+          <button class="choice" onclick="mc('q2-5',1,2)">② 22</button>
+          <button class="choice" onclick="mc('q2-5',2,2)">③ 23</button>
+          <button class="choice" onclick="mc('q2-5',3,2)">④ 24</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q2-5">💡 힌트까지 <b id="hcnt-q2-5">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q2-5" onclick="toggleHint('ht-q2-5')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q2-5">차이: 1,2,3,4,5 → 1씩 늘어남! 17+6=?</div>
+        </div>
+      </div>
+
+      <div class="room-clear" id="clear-2">🎉 2방 탈출 성공! 패턴 암호실 해독 완료!</div>
+    </div>
+  </div>
+
+  <!-- ══════════ 3방 ══════════ -->
+  <div class="room-card room-locked" id="room-3">
+    <div class="room-head" style="background:linear-gradient(135deg,rgba(22,163,74,.25),rgba(22,163,74,.08));border-bottom:1px solid rgba(22,163,74,.25);">
+      <div class="room-num" style="background:#16A34A;">🏗️</div>
+      <div><div class="room-title" style="color:#A7F3D0;">3방 — 도형 설계실</div>
+        <div class="room-sub">도형 설계 도면을 분석해 최종 탈출 코드를 찾아라!</div></div>
+    </div>
+    <div class="lock-notice" id="lock-3">🔒 2방을 먼저 탈출해야 열립니다</div>
+    <div class="q-list" id="qlist-3" style="display:none">
+
+      <!-- 3-1 객관식 -->
+      <div class="q-item" id="q3-1">
+        <div class="q-badge b-math">📘 수학 1</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#16A34A;">1</div>
+          <div class="q-text">"나는 꼭짓점이 없고 어느 방향으로도 굴릴 수 있어.<br>평평한 면이 단 하나도 없지. 나는 누구인가?"</div></div>
+        <div class="q-story">📐 벽에 수수께끼가 새겨져 있다!</div>
+        <div class="penalty-msg" id="pen-q3-1"></div>
+        <div class="choices">
+          <button class="choice" onclick="mc('q3-1',0,1)">① 직육면체</button>
+          <button class="choice" onclick="mc('q3-1',1,1)">② 구</button>
+          <button class="choice" onclick="mc('q3-1',2,1)">③ 원기둥</button>
+          <button class="choice" onclick="mc('q3-1',3,1)">④ 삼각뿔</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q3-1">💡 힌트까지 <b id="hcnt-q3-1">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q3-1" onclick="toggleHint('ht-q3-1')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q3-1">꼭짓점 없음 + 어디서나 굴림 + 평평한 면 없음 → 축구공!</div>
+        </div>
+      </div>
+
+      <!-- 3-2 넌센스 -->
+      <div class="q-item nonsense-item" id="q3-2">
+        <div class="q-badge b-ns">🧩 넌센스</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#D97706;">?</div>
+          <div class="q-text">3방 넌센스! 답을 직접 입력해봐.</div></div>
+        <div class="nonsense-box">소가 죽으면?</div>
+        <div class="q-story">🤔 생각을 비틀어봐!</div>
+        <div class="penalty-msg" id="pen-q3-2"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q3-2" placeholder="답 입력"/>
+          <button class="btn-submit" onclick="sa('q3-2', function(v){return v.trim().replace(/\s/g,'').toLowerCase()==='다이소';})">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q3-2">💡 힌트까지 <b id="hcnt-q3-2">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q3-2" onclick="toggleHint('ht-q3-2')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q3-2">소가 "다이" → 다이소! 😄</div>
+        </div>
+      </div>
+
+      <!-- 3-3 주관식 -->
+      <div class="q-item" id="q3-3">
+        <div class="q-badge b-math">📘 수학 2</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#16A34A;">2</div>
+          <div class="q-text">도면 비밀번호 — 직육면체의<br>면 수 + 꼭짓점 수 + 모서리 수 = ?<br>숫자로 입력해!</div></div>
+        <div class="q-story">🗂️ 도면에 직육면체 그림이 있다. 세어봐!</div>
+        <div class="penalty-msg" id="pen-q3-3"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q3-3" placeholder="숫자 입력"/>
+          <button class="btn-submit" onclick="sa('q3-3', function(v){return v.trim()==='26';})">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q3-3">💡 힌트까지 <b id="hcnt-q3-3">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q3-3" onclick="toggleHint('ht-q3-3')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q3-3">면 6개 + 꼭짓점 8개 + 모서리 12개 = ?</div>
+        </div>
+      </div>
+
+      <!-- 3-4 주관식 -->
+      <div class="q-item" id="q3-4">
+        <div class="q-badge b-math">📘 수학 3</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#16A34A;">3</div>
+          <div class="q-text">알지오매스 작품: 삼각형 2개 + 사각형 1개<br>총 꼭짓점 수를 입력해!</div></div>
+        <div class="q-story">🎨 모니터에 알지오매스 작품이 보인다!</div>
+        <div class="penalty-msg" id="pen-q3-4"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q3-4" placeholder="숫자 입력"/>
+          <button class="btn-submit" onclick="sa('q3-4', function(v){return v.trim()==='10';})">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q3-4">💡 힌트까지 <b id="hcnt-q3-4">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q3-4" onclick="toggleHint('ht-q3-4')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q3-4">삼각형 꼭짓점 3×2=6, 사각형 꼭짓점 4×1=4 → 6+4=?</div>
+        </div>
+      </div>
+
+      <!-- 3-5 최종 넌센스(피보나치) -->
+      <div class="q-item" id="q3-5">
+        <div class="q-badge b-ns">🧩 최종 암호</div>
+        <div class="q-header"><div class="q-num-circle" style="background:#D97706;">!</div>
+          <div class="q-text">🚨 최종 탈출 암호! 빈칸 ?에 들어갈 수를 입력해!</div></div>
+        <div class="nonsense-box">
+          0 - 1 - 1 - 2 - 3 - 5 - 8<br>
+          13 - 21 - 34 - ? - 89
+        </div>
+        <div class="q-story">🚪 탈출구 버튼에 수열이 새겨져 있다. 규칙을 찾아!</div>
+        <div class="penalty-msg" id="pen-q3-5"></div>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q3-5" placeholder="숫자 입력"/>
+          <button class="btn-submit" onclick="sa('q3-5', function(v){return v.trim()==='55';})">확인</button>
+        </div>
+        <div class="hint-wrap">
+          <div class="hint-cd-msg" id="hcd-q3-5">💡 힌트까지 <b id="hcnt-q3-5">30</b>초</div>
+          <button class="btn-hint" id="hbtn-q3-5" onclick="toggleHint('ht-q3-5')">💡 힌트 보기</button>
+          <div class="hint-text" id="ht-q3-5">앞의 두 수를 더하면 다음 수! 21+34=?</div>
+        </div>
+      </div>
+
+      <div class="room-clear" id="clear-3">🎉 3방 탈출 성공! 최종 탈출 코드를 확인하세요!</div>
+    </div>
+  </div>
+
+  <!-- 탈출 -->
+  <div class="room-card room-locked" id="room-escape">
+    <div class="escape-card">
+      <div style="font-size:60px;margin-bottom:14px;">🚀</div>
+      <div style="font-size:22px;font-weight:700;color:#BFDBFE;margin-bottom:10px;">탈출 성공!</div>
+      <div class="escape-code">MATH★2026</div>
+      <div style="margin-top:14px;font-size:13px;color:#64748B;">
+        탈출 시간: <span id="escape-time" style="color:#FCD34D;font-weight:700;"></span>
+      </div>
+      <div style="margin-top:14px;font-size:13px;color:#94A3B8;line-height:1.8;">
+        🎉 <span id="escape-team" style="color:#FCD34D;font-weight:700;"></span>팀 방탈출 완료!<br>
+        수 감각 ✓ · 패턴 ✓ · 도형 ✓ · 넌센스 ✓<br><br>
+        📌 패들렛 4차시 섹션에 탈출 코드 + 소감을 올려주세요!
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+<footer>디지털 수학 탐험대 · 에듀테크 기초학력 수학 캠프 · 전주완산초등학교</footer>
+
+<script>
+// 별
+(function(){var s=document.getElementById('stars');for(var i=0;i<70;i++){var el=document.createElement('div');el.className='star';var sz=Math.random()*3+1;el.style.cssText='width:'+sz+'px;height:'+sz+'px;top:'+Math.random()*100+'%;left:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s;animation-duration:'+(2+Math.random()*3)+'s;';s.appendChild(el);}})();
+
+// 메인 타이머
+var totalSec=1800,startTime=null,mainInt=null;
+function startTimer(){startTime=Date.now();mainInt=setInterval(function(){var rem=totalSec-Math.floor((Date.now()-startTime)/1000);if(rem<0)rem=0;var m=Math.floor(rem/60),s=rem%60;document.getElementById('timer').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;if(rem<=300)document.getElementById('timer').className='main-timer danger';if(rem===0)clearInterval(mainInt);},500);}
+function getElapsed(){if(!startTime)return'00:00';var e=Math.floor((Date.now()-startTime)/1000),m=Math.floor(e/60),s=e%60;return(m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+
+// 힌트 타이머
+var hTimers={};
+function startHintCd(qId){
+  if(hTimers[qId])return;
+  var cnt=document.getElementById('hcnt-'+qId),cd=document.getElementById('hcd-'+qId),btn=document.getElementById('hbtn-'+qId);
+  if(!cnt)return;
+  var sec=30;
+  hTimers[qId]=setInterval(function(){sec--;if(cnt)cnt.textContent=sec;if(sec<=0){clearInterval(hTimers[qId]);if(cd)cd.style.display='none';if(btn)btn.classList.add('ready');}},1000);
+}
+function toggleHint(id){var el=document.getElementById(id);if(el)el.classList.toggle('show');}
+
+// 문제 순차 공개
+var qOrder={
+  1:['q1-1','q1-2','q1-3','q1-4','q1-5'],
+  2:['q2-1','q2-2','q2-3','q2-4','q2-5'],
+  3:['q3-1','q3-2','q3-3','q3-4','q3-5']
+};
+var qProgress={1:0,2:0,3:0};
+
+function revealNext(room){
+  var idx=qProgress[room];
+  var list=qOrder[room];
+  if(idx>=list.length)return;
+  var qId=list[idx];
+  var el=document.getElementById(qId);
+  if(el){el.classList.add('visible');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  startHintCd(qId);
+  qProgress[room]=idx+1;
+}
+
+// 오답 패널티 20초
+var penaltyActive={};
+function setPenalty(qId){
+  if(penaltyActive[qId])return;
+  penaltyActive[qId]=true;
+  var item=document.getElementById(qId);
+  var pen=document.getElementById('pen-'+qId);
+  var btns=item?item.querySelectorAll('.choice'):[];
+  var inpWrap=item?item.querySelector('.short-answer-wrap'):null;
+  if(pen){pen.textContent='❌ 오답! 20초 후 다시 시도할 수 있어요.';pen.classList.add('show');}
+  btns.forEach(function(b){b.disabled=true;});
+  if(inpWrap){var sub=inpWrap.querySelector('.btn-submit');if(sub)sub.disabled=true;}
+  item&&item.classList.add('wrong-shake');
+  setTimeout(function(){item&&item.classList.remove('wrong-shake');},400);
+  var sec=20;
+  var pit=setInterval(function(){sec--;if(pen)pen.textContent='❌ 오답! '+sec+'초 후 다시 시도.';if(sec<=0){clearInterval(pit);delete penaltyActive[qId];btns.forEach(function(b){if(!b.classList.contains('correct')&&!b.classList.contains('incorrect'))b.disabled=false;});if(pen){pen.textContent='';pen.classList.remove('show');}if(inpWrap){var sub=inpWrap.querySelector('.btn-submit');if(sub)sub.disabled=false;var inp=inpWrap.querySelector('.short-input');if(inp){inp.classList.remove('wrong-input');inp.value='';}};}},1000);
+}
+
+// 객관식
+function mc(qId,chosen,correct){
+  var item=document.getElementById(qId);
+  if(!item||item.classList.contains('solved'))return;
+  if(penaltyActive[qId])return;
+  var btns=item.querySelectorAll('.choice');
+  if(chosen===correct){
+    item.classList.add('solved');
+    btns[chosen].classList.add('correct');
+    btns.forEach(function(b,i){if(i!==chosen){b.disabled=true;b.style.opacity='.35';}});
+    var hbtn=document.getElementById('hbtn-'+qId),cd=document.getElementById('hcd-'+qId);
+    if(hbtn)hbtn.style.display='none';if(cd)cd.style.display='none';
+    if(hTimers[qId])clearInterval(hTimers[qId]);
+    onSolve(qId);
+  } else {
+    btns[chosen].classList.add('incorrect');
+    btns[chosen].disabled=true;
+    setPenalty(qId);
+  }
+}
+
+// 주관식 체커들
+function checkBetween05and1(v){var n=parseFloat(v.trim());return !isNaN(n)&&n>0.5&&n<1;}
+function checkQ15(v){var s=v.trim().replace(/\s/g,'');return s==='3/4'||s==='0.75';}
+
+function sa(qId,checkFn){
+  var item=document.getElementById(qId);
+  if(!item||item.classList.contains('solved'))return;
+  if(penaltyActive[qId])return;
+  var inp=document.getElementById('inp-'+qId);
+  if(!inp)return;
+  var val=inp.value;
+  if(checkFn(val)){
+    item.classList.add('solved');
+    inp.classList.add('correct-input');
+    inp.disabled=true;
+    var sub=item.querySelector('.btn-submit');if(sub)sub.disabled=true;
+    var hbtn=document.getElementById('hbtn-'+qId),cd=document.getElementById('hcd-'+qId);
+    if(hbtn)hbtn.style.display='none';if(cd)cd.style.display='none';
+    if(hTimers[qId])clearInterval(hTimers[qId]);
+    onSolve(qId);
+  } else {
+    inp.classList.add('wrong-input');
+    setPenalty(qId);
+  }
+}
+
+// 정답 후 처리
+function onSolve(qId){
+  var room=parseInt(qId.charAt(1));
+  var list=qOrder[room];
+  var solvedIdx=list.indexOf(qId);
+  if(solvedIdx===list.length-1){
+    // 방 전체 클리어
+    setTimeout(function(){clearRoom(room);},600);
+  } else {
+    // 다음 문제 공개
+    setTimeout(function(){revealNext(room);},400);
+  }
+}
+
+function clearRoom(n){
+  var cl=document.getElementById('clear-'+n);
+  if(cl)cl.classList.add('show');
+  var chip=document.getElementById('chip-'+n);
+  if(chip){chip.classList.remove('active');chip.classList.add('done');}
+  if(n<3){setTimeout(function(){unlockRoom(n+1);},1200);}
+  else{setTimeout(function(){showEscape();},1200);}
+}
+
+function unlockRoom(n){
+  var room=document.getElementById('room-'+n);
+  var lock=document.getElementById('lock-'+n);
+  var qlist=document.getElementById('qlist-'+n);
+  if(room)room.classList.remove('room-locked');
+  if(lock)lock.style.display='none';
+  if(qlist)qlist.style.display='block';
+  var chip=document.getElementById('chip-'+n);
+  if(chip)chip.classList.add('active');
+  // 첫 문제 공개
+  revealNext(n);
+  setTimeout(function(){if(room)room.scrollIntoView({behavior:'smooth',block:'start'});},300);
+}
+
+function showEscape(){
+  var r=document.getElementById('room-escape');
+  if(r)r.classList.remove('room-locked');
+  var ce=document.getElementById('chip-esc');
+  if(ce)ce.classList.add('done');
+  document.getElementById('escape-team').textContent=document.getElementById('team-name').value||'우리';
+  document.getElementById('escape-time').textContent=getElapsed();
+  clearInterval(mainInt);
+  setTimeout(function(){if(r)r.scrollIntoView({behavior:'smooth',block:'start'});},300);
+}
+
+function startGame(){
+  document.getElementById('screen-intro').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  startTimer();
+  revealNext(1); // 1방 첫 문제 공개
+}
+</script>
+</body>
+</html>
