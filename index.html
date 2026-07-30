@@ -185,7 +185,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q1-1">💡 힌트까지 <b id="hcnt-q1-1">60</b>초</div>
           <button class="btn-hint" id="hbtn-q1-1" onclick="toggleHint('ht-q1-1')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q1-1">모두 소수로! 1/4=0.25, 2/5=0.4 → 비교해봐</div>
+          <div class="hint-text" id="ht-q1-1">분수를 소수로 바꿔서 비교해봐요! 1/4 = 0.2□, 2/5 = 0.□</div>
         </div>
       </div>
 
@@ -197,16 +197,14 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="nonsense-box">자가용의 반대말은?</div>
         <div class="q-story">🤔 수학이 아니야! 말의 반대를 생각해봐!</div>
         <div class="penalty-msg" id="pen-q1-2"></div>
-        <div class="choices">
-          <button class="choice" onclick="mc('q1-2',0,2)">① 버스</button>
-          <button class="choice" onclick="mc('q1-2',1,2)">② 대중교통</button>
-          <button class="choice" onclick="mc('q1-2',2,2)">③ 커용</button>
-          <button class="choice" onclick="mc('q1-2',3,2)">④ 타용</button>
+        <div class="short-answer-wrap">
+          <input class="short-input" id="inp-q1-2" placeholder="답 입력"/>
+          <button class="btn-submit" onclick="sa('q1-2', function(v){return v.trim().replace(/\s/g,'').toLowerCase()==='커용';})">확인</button>
         </div>
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q1-2">💡 힌트까지 <b id="hcnt-q1-2">60</b>초</div>
           <button class="btn-hint" id="hbtn-q1-2" onclick="toggleHint('ht-q1-2')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q1-2">"자"의 반대말은? → "커"! 자가용 → 커용 😄</div>
+          <div class="hint-text" id="ht-q1-2">자가용은 "작아용"으로 읽혀요. 그럼 반대말은?</div>
         </div>
       </div>
 
@@ -214,17 +212,17 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
       <div class="q-item" id="q1-3">
         <div class="q-badge b-math">📘 수학 2</div>
         <div class="q-header"><div class="q-num-circle" style="background:#2563EB;">2</div>
-          <div class="q-text">금고는 "1/2보다 크고 1보다 작은 수"만 열려.<br>조건에 맞는 소수를 직접 입력해봐! (예: 0.7)</div></div>
+          <div class="q-text">금고는 "1/2보다 크고 1보다 작은 수"만 열려.<br>조건에 맞는 소수를 직접 입력해봐!</div></div>
         <div class="q-story">🔐 금고 화면에 커서가 깜빡인다. 직접 입력해야 해!</div>
         <div class="penalty-msg" id="pen-q1-3"></div>
         <div class="short-answer-wrap">
-          <input class="short-input" id="inp-q1-3" placeholder="답 입력 (소수로)" />
+          <input class="short-input" id="inp-q1-3" placeholder="소수로 입력" />
           <button class="btn-submit" onclick="sa('q1-3', checkBetween05and1)">확인</button>
         </div>
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q1-3">💡 힌트까지 <b id="hcnt-q1-3">60</b>초</div>
           <button class="btn-hint" id="hbtn-q1-3" onclick="toggleHint('ht-q1-3')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q1-3">1/2=0.5야. 0.5보다 크고 1보다 작은 소수를 써봐. (예: 0.6, 0.7, 0.8, 0.9)</div>
+          <div class="hint-text" id="ht-q1-3">0.5보다 크고 1보다 작은 소수를 입력해봐요! 0.□</div>
         </div>
       </div>
 
@@ -244,7 +242,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q1-4">💡 힌트까지 <b id="hcnt-q1-4">60</b>초</div>
           <button class="btn-hint" id="hbtn-q1-4" onclick="toggleHint('ht-q1-4')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q1-4">소수로: 0.8/0.25/0.5/0.6 → 순서: 0.25,0.5,0.6,0.8 — 두 번째는?</div>
+          <div class="hint-text" id="ht-q1-4">소수로 바꾸면: 1/4=0.25, 3/5=0.6, 0.5, 0.8 → 작은 것부터 줄 세우면?</div>
         </div>
       </div>
 
@@ -262,7 +260,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q1-5">💡 힌트까지 <b id="hcnt-q1-5">60</b>초</div>
           <button class="btn-hint" id="hbtn-q1-5" onclick="toggleHint('ht-q1-5')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q1-5">4등분 → 점 3개: 1/4, 2/4(=1/2), 3/4 — 세 번째는?</div>
+          <div class="hint-text" id="ht-q1-5">4등분하면 점이 3개 생겨요 → 1/4, □/4, 3/4. 왼쪽에서 세 번째는?</div>
         </div>
       </div>
 
@@ -294,7 +292,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q2-1">💡 힌트까지 <b id="hcnt-q2-1">60</b>초</div>
           <button class="btn-hint" id="hbtn-q2-1" onclick="toggleHint('ht-q2-1')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q2-1">이웃한 수의 차이: 4, 4, 4 — 4씩 더하는 패턴! 11+4=?</div>
+          <div class="hint-text" id="ht-q2-1">7-3=□, 11-7=□ → 차이가 같아요! 11에 그 수를 더하면?</div>
         </div>
       </div>
 
@@ -321,7 +319,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q2-2">💡 힌트까지 <b id="hcnt-q2-2">60</b>초</div>
           <button class="btn-hint" id="hbtn-q2-2" onclick="toggleHint('ht-q2-2')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q2-2">앞 숫자 = 두 수의 차이, 뒷 숫자 = 두 수의 합!<br>7-3=4, 7+3=10 → "4 10"</div>
+          <div class="hint-text" id="ht-q2-2">5+3=28 → 앞 숫자 2는 5-3=□, 뒷 숫자 8은 5+3=□. 7+3도 같은 방식으로!</div>
         </div>
       </div>
 
@@ -341,7 +339,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q2-3">💡 힌트까지 <b id="hcnt-q2-3">60</b>초</div>
           <button class="btn-hint" id="hbtn-q2-3" onclick="toggleHint('ht-q2-3')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q2-3">입력값 × 4 = 출력값! 5 × 4 = ?</div>
+          <div class="hint-text" id="ht-q2-3">1×□=4, 2×□=8 → □는 같은 수예요! 5×□=?</div>
         </div>
       </div>
 
@@ -359,7 +357,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q2-4">💡 힌트까지 <b id="hcnt-q2-4">60</b>초</div>
           <button class="btn-hint" id="hbtn-q2-4" onclick="toggleHint('ht-q2-4')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q2-4">앞의 수 × 2 패턴! 8 × 2 = ?</div>
+          <div class="hint-text" id="ht-q2-4">1→2→4→8 → 앞의 수에 □를 곱하면 다음 수! 8×□=?</div>
         </div>
       </div>
 
@@ -379,7 +377,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q2-5">💡 힌트까지 <b id="hcnt-q2-5">60</b>초</div>
           <button class="btn-hint" id="hbtn-q2-5" onclick="toggleHint('ht-q2-5')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q2-5">차이: 1,2,3,4,5 → 1씩 늘어남! 17+6=?</div>
+          <div class="hint-text" id="ht-q2-5">차이: 3-2=1, 5-3=2, 8-5=3, 12-8=4, 17-12=5 → 다음 차이는 6! 17+6=?</div>
         </div>
       </div>
 
@@ -413,7 +411,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q3-1">💡 힌트까지 <b id="hcnt-q3-1">60</b>초</div>
           <button class="btn-hint" id="hbtn-q3-1" onclick="toggleHint('ht-q3-1')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q3-1">꼭짓점 없음 + 어디서나 굴림 + 평평한 면 없음 → 축구공!</div>
+          <div class="hint-text" id="ht-q3-1">꼭짓점 없음 + 평평한 면 없음 + 어디서나 굴림 → 축구공이나 농구공 모양의 도형은?</div>
         </div>
       </div>
 
@@ -432,7 +430,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q3-2">💡 힌트까지 <b id="hcnt-q3-2">60</b>초</div>
           <button class="btn-hint" id="hbtn-q3-2" onclick="toggleHint('ht-q3-2')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q3-2">소가 "다이" → 다이소! 😄</div>
+          <div class="hint-text" id="ht-q3-2">소가 죽으면 "다이"(die)했죠? "다이" + "소" = ?</div>
         </div>
       </div>
 
@@ -450,7 +448,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q3-3">💡 힌트까지 <b id="hcnt-q3-3">60</b>초</div>
           <button class="btn-hint" id="hbtn-q3-3" onclick="toggleHint('ht-q3-3')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q3-3">면 6개 + 꼭짓점 8개 + 모서리 12개 = ?</div>
+          <div class="hint-text" id="ht-q3-3">직육면체: 면=6개, 꼭짓점=8개, 모서리=12개 → 모두 더하면?</div>
         </div>
       </div>
 
@@ -468,7 +466,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q3-4">💡 힌트까지 <b id="hcnt-q3-4">60</b>초</div>
           <button class="btn-hint" id="hbtn-q3-4" onclick="toggleHint('ht-q3-4')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q3-4">삼각형 꼭짓점 3×2=6, 사각형 꼭짓점 4×1=4 → 6+4=?</div>
+          <div class="hint-text" id="ht-q3-4">삼각형 꼭짓점 3개×2개 = □, 사각형 꼭짓점 4개×1개 = □ → 합치면?</div>
         </div>
       </div>
 
@@ -490,7 +488,7 @@ footer{position:relative;z-index:10;text-align:center;padding:18px;font-size:12p
         <div class="hint-wrap">
           <div class="hint-cd-msg" id="hcd-q3-5">💡 힌트까지 <b id="hcnt-q3-5">60</b>초</div>
           <button class="btn-hint" id="hbtn-q3-5" onclick="toggleHint('ht-q3-5')">💡 힌트 보기</button>
-          <div class="hint-text" id="ht-q3-5">앞의 두 수를 더하면 다음 수! 21+34=?</div>
+          <div class="hint-text" id="ht-q3-5">0+1=1, 1+1=2, 1+2=3 → 앞의 두 수를 더하면 다음 수! 21+34=?</div>
         </div>
       </div>
 
